@@ -1,3 +1,4 @@
+var counter = 0;
 /*************************************************************
 
 You should implement your request handler function in this file.
@@ -21,15 +22,15 @@ var defaultCorsHeaders = {
   'access-control-max-age': 10 // Seconds.
 };
 var storage = {results: [
-    {
-      createdAt: '2017-02-27T23:49:53.511Z',
-      objectId: 'JbwGaKUfUk',
-      roomname: 'lobby',
-      text: 'fsadfdsa',
-      username: 'apple',
-      updatedAt: '2017-02-27T23:49:53.511Z'
-    }]};
-var body = [];
+  {
+    createdAt: '2017-02-27T23:49:53.511Z',
+    objectId: 'JbwGaKUfUk',
+    roomname: 'lobby',
+    text: 'fsadfdsa',
+    username: 'apple',
+    updatedAt: '2017-02-27T23:49:53.511Z'
+  }]};
+
 var requestHandler = function(request, response) {
   // Request and Response come from node's http module.
   //
@@ -67,24 +68,25 @@ var requestHandler = function(request, response) {
   // which includes the status and all headers.
   response.writeHead(statusCode, headers);
 
-  console.log('hi');
-  // handle both GET and POST requests
-  if (request.method === 'GET') {
-    if (request.url.slice(0, 17) !== '/classes/messages') {
-      response.writeHead(404, headers);
-      response.end();
-    } else {
-      response.end(JSON.stringify(storage));
-    }
-  } else if (request.method === 'POST') {
+  if (request.url.slice(0, 17) !== '/classes/messages') {
+    statusCode = 404;
+    response.writeHead(statusCode, headers);
+  }
+
+  if (request.method === 'POST' && statusCode !== 404) {
+    statusCode = 201;
+    response.writeHead(statusCode, headers);
     request.on('data', function(chunk) {
+      var body = [];
       body.push(chunk);
       body = Buffer.concat(body).toString();
-      storage.results.push(body);
-      console.log(body);
+      var data = body.split('&');
+      storage.results.push({objectId: 'JbwGaKUfUj' + counter, username: data[0].split('=')[1], text: data[1].split('=')[1], roomname: data[2].split('=')[1], createdAt: new Date().toISOString()});
       body = [];
     });
+    counter++;
   }
+  // console.log(storage.results);
   // Make sure to always call response.end() - Node may not send
   // anything back to the client until you do. The string you pass to
   // response.end() will be the body of the response - i.e. what shows
