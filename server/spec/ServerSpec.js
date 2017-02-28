@@ -53,7 +53,6 @@ describe('Node Server Request Listener Function', function() {
     var parsedBody = JSON.parse(res._data);
     expect(parsedBody).to.have.property('results');
     expect(parsedBody.results).to.be.an('array');
-    console.log(parsedBody);
     expect(res._ended).to.equal(true);
   });
 

@@ -1,4 +1,3 @@
-var counter = 0;
 /*************************************************************
 
 You should implement your request handler function in this file.
@@ -29,7 +28,9 @@ var storage = {results: [
     text: 'fsadfdsa',
     username: 'apple',
     updatedAt: '2017-02-27T23:49:53.511Z'
-  }]};
+  }
+]};
+var counter = 0;
 
 var requestHandler = function(request, response) {
   // Request and Response come from node's http module.
@@ -47,7 +48,7 @@ var requestHandler = function(request, response) {
   // debugging help, but you should always be careful about leaving stray
   // console.logs in your code.
   console.log('Serving request type ' + request.method + ' for url ' + request.url);
-  var filePath = path.join(__dirname, request.url);
+  
 
   // storage
   
@@ -66,9 +67,9 @@ var requestHandler = function(request, response) {
 
   // .writeHead() writes to the request line and headers of the response,
   // which includes the status and all headers.
-  response.writeHead(statusCode, headers);
+  
 
-  if (request.url.slice(0, 17) !== '/classes/messages') {
+  if (request.url.slice(0, 17) !== '/classes/messages' && request.url.slice(0, 14) !== '/classes/room') {
     statusCode = 404;
     response.writeHead(statusCode, headers);
   }
@@ -77,15 +78,16 @@ var requestHandler = function(request, response) {
     statusCode = 201;
     response.writeHead(statusCode, headers);
     request.on('data', function(chunk) {
-      var body = [];
-      body.push(chunk);
-      body = Buffer.concat(body).toString();
-      var data = body.split('&');
-      storage.results.push({objectId: 'JbwGaKUfUj' + counter, username: data[0].split('=')[1], text: data[1].split('=')[1], roomname: data[2].split('=')[1], createdAt: new Date().toISOString()});
-      body = [];
+      var data = chunk.toString().split('&');
+      if (data.length === 1) {
+        storage.results.push({objectId: 'JbwGaKUfUj' + counter, username: data[0].username, text: data[0].message, createdAt: new Date().toISOString()});
+      } else {
+        storage.results.push({objectId: 'JbwGaKUfUj' + counter, username: data[0].split('=')[1], text: data[1].split('=')[1].split('+').join(' '), roomname: data[2].split('=')[1], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString()});
+      }
     });
     counter++;
   }
+  response.writeHead(statusCode, headers);
   // console.log(storage.results);
   // Make sure to always call response.end() - Node may not send
   // anything back to the client until you do. The string you pass to
