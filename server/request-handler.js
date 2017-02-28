@@ -20,6 +20,16 @@ var defaultCorsHeaders = {
   'access-control-allow-headers': 'content-type, accept',
   'access-control-max-age': 10 // Seconds.
 };
+var storage = {results: [
+    {
+      createdAt: '2017-02-27T23:49:53.511Z',
+      objectId: 'JbwGaKUfUk',
+      roomname: 'lobby',
+      text: 'fsadfdsa',
+      username: 'apple',
+      updatedAt: '2017-02-27T23:49:53.511Z'
+    }]};
+var body = [];
 var requestHandler = function(request, response) {
   // Request and Response come from node's http module.
   //
@@ -36,8 +46,10 @@ var requestHandler = function(request, response) {
   // debugging help, but you should always be careful about leaving stray
   // console.logs in your code.
   console.log('Serving request type ' + request.method + ' for url ' + request.url);
-  console.log(__dirname);
   var filePath = path.join(__dirname, request.url);
+
+  // storage
+  
 
   // The outgoing status.
   var statusCode = 200;
@@ -55,6 +67,24 @@ var requestHandler = function(request, response) {
   // which includes the status and all headers.
   response.writeHead(statusCode, headers);
 
+  console.log('hi');
+  // handle both GET and POST requests
+  if (request.method === 'GET') {
+    if (request.url.slice(0, 17) !== '/classes/messages') {
+      response.writeHead(404, headers);
+      response.end();
+    } else {
+      response.end(JSON.stringify(storage));
+    }
+  } else if (request.method === 'POST') {
+    request.on('data', function(chunk) {
+      body.push(chunk);
+      body = Buffer.concat(body).toString();
+      storage.results.push(body);
+      console.log(body);
+      body = [];
+    });
+  }
   // Make sure to always call response.end() - Node may not send
   // anything back to the client until you do. The string you pass to
   // response.end() will be the body of the response - i.e. what shows
@@ -62,16 +92,7 @@ var requestHandler = function(request, response) {
   //
   // Calling .end "flushes" the response's internal buffer, forcing
   // node to actually send all the data over to the client.
-  response.end(JSON.stringify({results: [
-    {
-      createdAt: '2017-02-27T23:49:53.511Z',
-      objectId: 'JbwGaKUfUk',
-      roomname: 'lobby',
-      text: 'fsadfdsa',
-      username: 'apple',
-      updatedAt: '2017-02-27T23:49:53.511Z'
-    }
-  ]}));
+  response.end(JSON.stringify(storage));
 };
 
 // These headers will allow Cross-Origin Resource Sharing (CORS).
