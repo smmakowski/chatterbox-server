@@ -21,14 +21,14 @@ var defaultCorsHeaders = {
   'access-control-max-age': 10 // Seconds.
 };
 var storage = {results: [
-  {
-    createdAt: '2017-02-27T23:49:53.511Z',
-    objectId: 'JbwGaKUfUk',
-    roomname: 'lobby',
-    text: 'fsadfdsa',
-    username: 'apple',
-    updatedAt: '2017-02-27T23:49:53.511Z'
-  }
+  // {
+  //   createdAt: '2017-02-27T23:49:53.511Z',
+  //   objectId: 'JbwGaKUfUk',
+  //   roomname: 'lobby',
+  //   text: 'Do my bidding!',
+  //   username: 'Jono',
+  //   updatedAt: '2017-02-27T23:49:53.511Z'
+  // }
 ]};
 var counter = 0;
 
@@ -80,9 +80,17 @@ var requestHandler = function(request, response) {
     request.on('data', function(chunk) {
       var data = chunk.toString().split('&');
       if (data.length === 1) {
-        storage.results.push({objectId: 'JbwGaKUfUj' + counter, username: data[0].username, text: data[0].message, createdAt: new Date().toISOString()});
+        if (typeof data[0] === 'string') {
+          data = JSON.parse(data[0]);
+        }
+        storage.results.push({objectId: 'JbwGaKUfUj' + counter, username: data.username, message: data.message, createdAt: new Date().toISOString()});
       } else {
-        storage.results.push({objectId: 'JbwGaKUfUj' + counter, username: data[0].split('=')[1], text: data[1].split('=')[1].split('+').join(' '), roomname: data[2].split('=')[1], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString()});
+        storage.results.push({
+          objectId: 'JbwGaKUfUj' + counter, 
+          username: data[0].split('=')[1], 
+          text: data[1].split('=')[1].split('+').join(' '), 
+          roomname: data[2].split('=')[1], createdAt: new Date().toISOString(), 
+          updatedAt: new Date().toISOString()});
       }
     });
     counter++;
