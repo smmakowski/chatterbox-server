@@ -44,6 +44,17 @@ describe('Node Server Request Listener Function', function() {
     expect(res._ended).to.equal(true);
   });
 
+  it('ADDTL: Should send an object with only one property', function() {
+    var req = new stubs.request('/classes/messages', 'GET');
+    var res = new stubs.response();
+
+    handler.requestHandler(req, res);
+
+    var parsedBody = JSON.parse(res._data);
+    expect(Object.keys(parsedBody).length).to.equal(1);
+  });
+
+
   it('Should send an object containing a `results` array', function() {
     var req = new stubs.request('/classes/messages', 'GET');
     var res = new stubs.response();
@@ -54,6 +65,18 @@ describe('Node Server Request Listener Function', function() {
     expect(parsedBody).to.have.property('results');
     expect(parsedBody.results).to.be.an('array');
     expect(res._ended).to.equal(true);
+  });
+
+  it('ADDTL:`results` array should be empty on load', function() {
+    var req = new stubs.request('/classes/messages', 'GET');
+    var res = new stubs.response();
+
+    handler.requestHandler(req, res);
+
+    var parsedBody = JSON.parse(res._data);
+    expect(parsedBody).to.have.property('results');
+    expect(parsedBody.results).to.be.an('array');
+    expect(parsedBody.results.length).to.equal(0);
   });
 
   it('Should accept posts to /classes/room', function() {
@@ -98,6 +121,60 @@ describe('Node Server Request Listener Function', function() {
     expect(messages.length).to.be.above(0);
     expect(messages[0].username).to.equal('Jono');
     expect(messages[0].message).to.equal('Do my bidding!');
+    expect(res._ended).to.equal(true);
+  });
+
+  it('ADDTL: "results" array to have messages if new message POSTed after load', function() {
+    var stubMsg = {
+      username: 'Jono',
+      message: 'Do my bidding!'
+    };
+    var req = new stubs.request('/classes/messages', 'POST', stubMsg);
+    var res = new stubs.response();
+
+    handler.requestHandler(req, res);
+
+    expect(res._responseCode).to.equal(201);
+
+      // Now if we request the log for that room the message we posted should be there:
+    req = new stubs.request('/classes/messages', 'GET');
+    res = new stubs.response();
+
+    handler.requestHandler(req, res);
+
+    expect(res._responseCode).to.equal(200);
+    var messages = JSON.parse(res._data).results;
+    expect(messages.length).to.be.above(0);
+  });
+
+  it('ADDTL: Should respond with messages that have objectId, username, message, and createdAt as properties', function() {
+    var stubMsg = {
+      username: 'Jono',
+      createdAt: 'Just now',
+      message: 'Do my bidding!',
+      objectId: 'Unique'
+    };
+    var req = new stubs.request('/classes/messages', 'POST', stubMsg);
+    var res = new stubs.response();
+
+    handler.requestHandler(req, res);
+
+    expect(res._responseCode).to.equal(201);
+
+      // Now if we request the log for that room the message we posted should be there:
+    req = new stubs.request('/classes/messages', 'GET');
+    res = new stubs.response();
+
+    handler.requestHandler(req, res);
+
+    expect(res._responseCode).to.equal(200);
+    var messages = JSON.parse(res._data).results;
+    expect(messages.length).to.be.above(0);
+    expect(messages[0].username).to.not.equal(undefined);
+    expect(messages[0].message).to.not.equal(undefined);
+    expect(messages[0].objectId).to.not.equal(undefined);
+    expect(messages[0].createdAt).to.not.equal(undefined);
+
     expect(res._ended).to.equal(true);
   });
 

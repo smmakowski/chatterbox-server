@@ -20,16 +20,7 @@ var defaultCorsHeaders = {
   'access-control-allow-headers': 'content-type, accept',
   'access-control-max-age': 10 // Seconds.
 };
-var storage = {results: [
-  // {
-  //   createdAt: '2017-02-27T23:49:53.511Z',
-  //   objectId: 'JbwGaKUfUk',
-  //   roomname: 'lobby',
-  //   text: 'Do my bidding!',
-  //   username: 'Jono',
-  //   updatedAt: '2017-02-27T23:49:53.511Z'
-  // }
-]};
+var storage = {results: []};
 var counter = 0;
 
 var requestHandler = function(request, response) {
